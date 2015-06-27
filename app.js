@@ -1,4 +1,5 @@
 var express = require('express'),
+    http = require('http'),
     mongoskin = require('mongoskin'),
     bodyParser = require('body-parser'),
     logger = require('morgan')
@@ -60,6 +61,24 @@ app.del('/collections/:collectionName/:id', function (req, res, next) {
     })
 })
 
-app.listen(3000, function () {
-    console.log('Server is running')
-})
+//app.listen(3000, function () {
+//    console.log('Server is running')
+//})
+app.set('port', process.env.PORT || 3000);
+var server = http.createServer(app);
+var boot = function () {
+    server.listen(app.get('port'), function(){
+        console.info('Express server listening on port ' + app.get('port'));
+    });
+}
+var shutdown = function() {
+    server.close();
+}
+if (require.main === module) {
+    boot();
+} else {
+    console.info('Running app as a module')
+    exports.boot = boot;
+    exports.shutdown = shutdown;
+    exports.port = app.get('port');
+}
